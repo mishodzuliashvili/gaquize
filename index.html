@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Quiz App</title>
+</head>
+
+<body>
+  <div>
+    <textarea id="text" placeholder="Enter your quiz questions here"></textarea>
+    <input type="text" value="," id="seperator" placeholder="Enter your separator here">
+    <button onclick="generateQuestions()">Generate Quiz</button>
+  </div>
+  <div id="questions"></div>
+
+  <script>
+    function generateQuestions() {
+      const text = document.getElementById("text").value;
+      const seperator = document.getElementById("seperator").value;
+
+      const questionsLines = text.split(/\n/).filter((line) => line.trim() !== "");
+
+      const questions = questionsLines.map((line) => {
+        const splittedLine = line.split(seperator);
+        const question = splittedLine[0];
+        const answers = [];
+        let rightAnswer = null;
+
+        for (let i = 1; i < splittedLine.length; i++) {
+          const word = splittedLine[i].trim();
+          if (word.startsWith("*") && word.endsWith("*")) {
+            rightAnswer = word.slice(1, -1);
+            answers.push(rightAnswer);
+          } else {
+            answers.push(word);
+          }
+        }
+
+        return {
+          question,
+          rightAnswer,
+          answers,
+        };
+      });
+
+      addToHtml(questions);
+    }
+
+    function addToHtml(questions) {
+      const questionsDiv = document.getElementById("questions");
+      questions.forEach((element, index) => {
+        const questionWrapper = document.createElement("div");
+        const questionText = document.createElement("p");
+        questionText.innerHTML = `${index + 1}. ${element.question}`;
+        questionWrapper.appendChild(questionText);
+
+        element.answers.forEach((answer) => {
+          const answerInput = document.createElement("input");
+          answerInput.type = "radio";
+          answerInput.name = `question${index}`;
+          answerInput.value = answer;
+          answerInput.addEventListener("change", function () {
+
+            questionText.innerHTML = `${index + 1}. ${element.question} - Your Answer: ${this.value}. Right Answer: ${element.rightAnswer}`;
+          });
+          questionWrapper.appendChild(answerInput);
+
+          const answerLabel = document.createElement("label");
+          answerLabel.innerHTML = answer;
+          questionWrapper.appendChild(answerLabel);
+
+          const lineBreak = document.createElement("br");
+          questionWrapper.appendChild(lineBreak);
+        });
+
+        questionsDiv.appendChild(questionWrapper);
+      });
+    }
+  </script>
+</body>
+
+</html>
